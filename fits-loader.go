@@ -260,11 +260,11 @@ func (d *data) updateOrAdd() (err error) {
 }
 
 // deleteThenSave saves data to the FITS db.  Observations for the source are first deleted and then
-// valiues in *obs added.  This is done in a transaction.
+// values in *obs added.  This is done in a transaction.
 func (d *data) deleteThenSave() (err error) {
 
-	// you can test the transaction by adding a dupicate observation.  Either here the insert string
-	// or in the source data (if you don't use data.checkDuplicateObs() before calling this function.
+	// you can test the transaction by adding a duplicate observation.  Either here by adding to the insert string
+	// or in the source data (if you don't use data.checkDuplicateObs() before calling this function).
 
 	log.Printf("syncing FITS db with %s observations for %s.%s", d.source.typeID, d.source.networkID, d.source.siteID)
 
@@ -434,7 +434,7 @@ func saveSItes(f string) (err error) {
 
 // valid checks that the site  referred to by the pointer s is valid.
 // * Checks that s.networkID is in the DB.
-// Bear in mind the DB could change between validation and save.
+// Keep in mind the DB could change between validation and save.
 func (s *site) valid() (err error) {
 	var d string
 
@@ -455,7 +455,7 @@ func (s *site) save() (err error) {
 	return err
 }
 
-// valid makes sure the source information is valid (exists in the DB).
+// valid makes sure the source information is valid (exists in the FITS DB).
 func (s *source) valid() (err error) {
 	var d string
 
