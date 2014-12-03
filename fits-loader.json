@@ -1,0 +1,9 @@
+{
+	"DataBase": {
+		"Host": "localhost",
+		"User": "fits_w",
+		"Password": "test",
+		"MaxOpenConns": 2, 
+		"MaxIdleConns": 1
+	}
+}
