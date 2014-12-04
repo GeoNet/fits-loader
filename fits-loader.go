@@ -28,11 +28,6 @@ type DataBase struct {
 	MaxOpenConns, MaxIdleConns int
 }
 
-type site struct {
-	networkID, siteID, name                          string
-	longitude, latitude, height, ground_relationship float64
-}
-
 type source struct {
 	networkID, siteID, typeID, methodID, sampleID, systemID string
 }
@@ -57,7 +52,6 @@ var (
 	checkSample    *sql.Stmt
 	checkSystem    *sql.Stmt
 	addObservation *sql.Stmt
-	siteFile       string
 	dataDir        string
 	slog           bool
 	configFile     string
@@ -66,9 +60,8 @@ var (
 )
 
 func init() {
-	flag.StringVar(&siteFile, "site-file", "", "CSV file of site information to load into the FITS database.")
 	flag.StringVar(&dataDir, "data-dir", "", "path to directory of observation CSV files.")
-	flag.StringVar(&configFile, "config-file", "/etc/sysconfig/fits-loader.json", "optional file to load the config from.")
+	flag.StringVar(&configFile, "config-file", "fits-loader.json", "optional file to load the config from.")
 	flag.BoolVar(&slog, "syslog", false, "output log messages to syslog instead of stdout.")
 	flag.BoolVar(&deleteFirst, "delete-first", false, "sync the FITS DB data with the information in each CSV file.  Duplicate time stamps are a validation error.")
 	flag.BoolVar(&dryRun, "dry-run", false, "data is parsed and validated but not loaded to the DB.  A DB connection is needed for validation.")
@@ -106,12 +99,6 @@ func main() {
 
 	if err := prepareStatements(); err != nil {
 		log.Fatal(err)
-	}
-
-	if siteFile != "" {
-		if err := saveSItes(siteFile); err != nil {
-			log.Fatal(err)
-		}
 	}
 
 	if dataDir != "" {
@@ -362,97 +349,6 @@ func (d *data) deleteThenSave() (err error) {
 	}
 
 	return tx.Commit()
-}
-
-// saveSites reads CSV site data from a file, validates the site information, then saves it to the FITS database.
-//
-// The CSV file format must be one line per site with 7 columns:
-//    networkID, siteID, name, longitude, latitude, height, ground_relationship
-// e.g.,
-//    XX,NLS1,"Nelson Landslide 1",173.255763078,-41.27828177106451,-999.9,-999.9
-//
-// Fields can be surrounded with double quotes.  This allows names to have apostrophe etc.
-// Leading white space is trimmed from a field.
-func saveSItes(f string) (err error) {
-	log.Printf("parsing and validating site data from %f", f)
-
-	file, err := os.Open(f)
-	if err != nil {
-		return err
-	}
-
-	r := csv.NewReader(file)
-
-	r.FieldsPerRecord = 7
-	r.TrimLeadingSpace = true
-
-	rawSites, err := r.ReadAll()
-	if err != nil {
-		return err
-	}
-
-	for _, e := range rawSites {
-		s := site{
-			networkID: e[0],
-			siteID:    e[1],
-			name:      e[2],
-		}
-
-		s.longitude, err = strconv.ParseFloat(e[3], 64)
-		if err != nil {
-			return fmt.Errorf("error parsing longitude for site %s.%s: %s", s.networkID, s.siteID, e[3])
-		}
-
-		s.latitude, err = strconv.ParseFloat(e[4], 64)
-		if err != nil {
-			return fmt.Errorf("error parsing latitude for site %s.%s: %s", s.networkID, s.siteID, e[4])
-		}
-
-		s.height, err = strconv.ParseFloat(e[5], 64)
-		if err != nil {
-			return fmt.Errorf("error parsing height for site %s.%s: %s", s.networkID, s.siteID, e[5])
-		}
-
-		s.ground_relationship, err = strconv.ParseFloat(e[6], 64)
-		if err != nil {
-			return fmt.Errorf("error parsing ground_relationship for site %s.%s: %s", s.networkID, s.siteID, e[6])
-		}
-
-		if err = s.valid(); err != nil {
-			return fmt.Errorf("invalid site information for %s.%s: %s", s.siteID, s.networkID, err)
-		}
-
-		if !dryRun {
-			log.Printf("adding or updating FITS DB site information for %s.%s", s.networkID, s.siteID)
-			if err = s.save(); err != nil {
-				return err
-			}
-		}
-	}
-	return err
-}
-
-// valid checks that the site  referred to by the pointer s is valid.
-// * Checks that s.networkID is in the DB.
-// Keep in mind the DB could change between validation and save.
-func (s *site) valid() (err error) {
-	var d string
-
-	err = checkNetwork.QueryRow(s.networkID).Scan(&d)
-	if err == sql.ErrNoRows {
-		return fmt.Errorf("networkID %s not found in the DB", s.networkID)
-	}
-	if err != nil {
-		return err
-	}
-
-	return err
-}
-
-// save saves the site referred to by the pointer s to the FITS DB.
-func (s *site) save() (err error) {
-	_, err = addSite.Exec(s.networkID, s.siteID, s.name, s.longitude, s.latitude, s.height, s.ground_relationship)
-	return err
 }
 
 // valid makes sure the source information is valid (exists in the FITS DB).
