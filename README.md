@@ -2,6 +2,8 @@
 
 Loads source and observation data into the Field Information Time Series data base.
 
+[![Build Status](https://snap-ci.com/GeoNet/fits-loader/branch/master/build_image)](https://snap-ci.com/GeoNet/fits-loader/branch/master)
+
 ### Usage
 
 `fits-loader` reads a data directory looking for observation CSV files.  Each observation file must have a corresponding source JSON file that 
