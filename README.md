@@ -61,7 +61,8 @@ The file `fits-loader.json` holds the database configuration e.g.,
 		"User": "fits_w",
 		"Password": "test",
 		"MaxOpenConns": 2, 
-		"MaxIdleConns": 1
+		"MaxIdleConns": 1,
+		"SSLMode": "require"
 	}
 }
 
@@ -72,6 +73,8 @@ The file `fits-loader.json` holds the database configuration e.g.,
  ```
 fits-loader --config-file /etc/sysconfig/fits-loader.json ...
 ```
+
+`SSLMode` should be set to `require` for running with databases that support it (e.g., AWS RDS).  This setting is automatically changed to `disable` when running the tests.  See also Connection String Parameters here http://godoc.org/github.com/lib/pq  
 
 ###### Update or Add Data
 

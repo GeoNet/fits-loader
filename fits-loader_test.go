@@ -6,6 +6,7 @@ import (
 
 // setup starts a db connection and test server then inits an http client.
 func setup() {
+	config.DataBase.SSLMode = "disable"
 	if err := config.initDB(); err != nil {
 		log.Fatal(err)
 	}

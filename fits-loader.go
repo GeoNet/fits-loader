@@ -17,8 +17,8 @@ type Config struct {
 }
 
 type DataBase struct {
-	Host, User, Password       string
-	MaxOpenConns, MaxIdleConns int
+	Host, User, Password, SSLMode string
+	MaxOpenConns, MaxIdleConns    int
 }
 
 var (
@@ -135,7 +135,8 @@ func (c *Config) initDB() (err error) {
 		" password="+c.DataBase.Password+
 		" host="+c.DataBase.Host+
 		" connect_timeout=30"+
-		" dbname=fits sslmode=disable")
+		" dbname=fits"+
+		" sslmode="+c.DataBase.SSLMode)
 	if err != nil {
 		return err
 	}
