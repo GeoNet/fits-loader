@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"flag"
+	"fmt"
 	_ "github.com/lib/pq"
 	"io/ioutil"
 	"log"
@@ -21,14 +22,14 @@ type DataBase struct {
 	MaxOpenConns, MaxIdleConns    int
 }
 
+const vers = "0.1"
+
 var (
-	config      = initConfig()
-	db          *sql.DB
-	dataDir     string
-	slog        bool
-	configFile  string
-	dryRun      bool
-	deleteFirst bool
+	config                             = initConfig()
+	db                                 *sql.DB
+	dataDir                            string
+	configFile                         string
+	dryRun, deleteFirst, slog, version bool
 )
 
 func initConfig() Config {
@@ -37,7 +38,13 @@ func initConfig() Config {
 	flag.BoolVar(&slog, "syslog", false, "output log messages to syslog instead of stdout.")
 	flag.BoolVar(&deleteFirst, "delete-first", false, "sync the FITS DB data with the information in each observation file.")
 	flag.BoolVar(&dryRun, "dry-run", false, "data is parsed and validated but not loaded to the DB.  A DB connection is needed for validation.")
+	flag.BoolVar(&version, "version", false, "prints the version and exits.")
 	flag.Parse()
+
+	if version {
+		fmt.Printf("fits-loader version %s\n", vers)
+		os.Exit(1)
+	}
 
 	if slog {
 		logwriter, err := syslog.New(syslog.LOG_NOTICE, "fits-loader")
