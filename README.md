@@ -9,7 +9,7 @@ Loads source and observation data into the Field Information Time Series data ba
 `fits-loader` reads a data directory looking for observation CSV files.  Each observation file must have a corresponding source JSON file that 
 contains the addtional meta data required for processing the observation file.  Each observation and source file should have the same name with appropriate extensions e.g., observations: `VGT2_e.csv` and source: `VGT2_e.json`
 
-#### File Fomats
+#### File Formats
 
 ##### Observation File
 
