@@ -81,7 +81,7 @@ fits-loader --config-file /etc/sysconfig/fits-loader.json ...
 Specify a path to a directory containing observation CSV and source JSON files.  There must be one source JSON file per CSV file.  
 
 ```
-fits-loader --config-file /etc/sysconfig/fits-loader.json --data-dir = /work/gnss
+fits-loader --config-file /etc/sysconfig/fits-loader.json --data-dir /work/gnss
 ```
 
 * Observation and source data are loaded and validated.
@@ -95,7 +95,7 @@ file the value and error are updated.
 The observations in the DB  for the source are synchronised exactly with those in the observation file.
 
 ```
-fits-loader --config-file /etc/sysconfig/fits-loader.json --data-dir = /work/gnss --delete-first
+fits-loader --config-file /etc/sysconfig/fits-loader.json --data-dir /work/gnss --delete-first
 ```
 
  Observation and source data are loaded and validated.
