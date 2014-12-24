@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"time"
 )
@@ -47,10 +48,16 @@ func (o *observation) read(f io.Reader) (err error) {
 		if err != nil {
 			return fmt.Errorf("error parsing value in row %d: %s", i+1, r[1])
 		}
+		if math.IsNaN(obs.v) {
+			return fmt.Errorf("Found NaN value in row %d: %s", i+1, r[1])
+		}
 
 		obs.e, err = strconv.ParseFloat(r[2], 64)
 		if err != nil {
 			return fmt.Errorf("error parsing error in row %d: %s", i+1, r[2])
+		}
+		if math.IsNaN(obs.e) {
+			return fmt.Errorf("Found NaN error in row %d: %s", i+1, r[2])
 		}
 
 		o.obs[i] = obs
