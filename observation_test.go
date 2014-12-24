@@ -84,4 +84,16 @@ func TestObservation(t *testing.T) {
 	}
 	f.Close()
 
+	f, err = os.Open("etc/errors/VGT2_e_nan.csv")
+	if err != nil {
+		t.Error(err)
+	}
+
+	o = observation{}
+
+	if err = o.read(f); err == nil {
+		t.Error("expect an error parsing error for nan")
+	}
+	f.Close()
+
 }
