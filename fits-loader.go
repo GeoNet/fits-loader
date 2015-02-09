@@ -22,7 +22,7 @@ type DataBase struct {
 	MaxOpenConns, MaxIdleConns    int
 }
 
-const vers = "0.1"
+const vers = "0.2"
 
 var (
 	config                             = initConfig()
