@@ -1,4 +1,3 @@
-insert into fits.network (networkID, description) VALUES ('CG', 'The GeoNet CGPS network');
 insert into fits.unit(symbol, name) VALUES ('mm', 'millimetre');
 insert into fits.type (typeID, name, description, unitPK) VALUES ('e', 'east', 'displacement from initial position', (select unitPK from fits.unit where symbol = 'mm'));
 insert into fits.method (methodID, name, description, reference) VALUES ('bernese5', 'Bernese v5.0', 'Bernese v5.0 GNS processing software', 'http://info.geonet.org.nz/x/XoIW');

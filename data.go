@@ -16,11 +16,11 @@ var (
 
 // initData should be called after the db is available.
 func initData() (err error) {
-	// networkID, siteID, typeID, methodID, sampleID, systemID, time, value, error
-	addObservation, err = db.Prepare("SELECT fits.add_observation($1, $2, $3, $4, $5, $6, $7, $8 ,$9)")
+	// siteID, typeID, methodID, sampleID, systemID, time, value, error
+	addObservation, err = db.Prepare("SELECT fits.add_observation($1, $2, $3, $4, $5, $6, $7, $8)")
 
-	// networkID, siteID, name, longitude, latitude, height, ground_relationship
-	addSite, err = db.Prepare("SELECT fits.add_site($1, $2, $3, $4, $5, $6, $7)")
+	// siteID, name, longitude, latitude, height, ground_relationship
+	addSite, err = db.Prepare("SELECT fits.add_site($1, $2, $3, $4, $5, $6)")
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,6 @@ func (d *data) parseAndValidate() (err error) {
 func (d *data) updateOrAdd() (err error) {
 	for _, o := range d.obs {
 		_, err = addObservation.Exec(
-			d.Properties.NetworkID,
 			d.Properties.SiteID,
 			d.Properties.TypeID,
 			d.Properties.MethodID,
@@ -94,12 +93,9 @@ func (d *data) deleteThenSave() (err error) {
 
 	var sitePK int
 	err = tx.QueryRow(`SELECT DISTINCT ON (sitepk) sitepk 
-				FROM fits.site JOIN fits.network USING (networkpk) 
-				WHERE siteid = $2 
-				AND 
-				networkid = $1`, d.Properties.NetworkID, d.Properties.SiteID).Scan(&sitePK)
+				FROM fits.site WHERE siteid = $1`, d.Properties.SiteID).Scan(&sitePK)
 	if err == sql.ErrNoRows {
-		return fmt.Errorf("couldn't get sitePK for %s.%s", d.Properties.NetworkID, d.Properties.SiteID)
+		return fmt.Errorf("couldn't get sitePK for %s", d.Properties.SiteID)
 	}
 	if err != nil {
 		return err
@@ -146,9 +142,9 @@ func (d *data) deleteThenSave() (err error) {
 
 	obsDelete, err := tx.Prepare(`DELETE FROM fits.observation
 					WHERE
-					sitepk = (SELECT DISTINCT ON (sitepk) sitepk FROM fits.site JOIN fits.network USING (networkpk) WHERE siteid = $2 AND networkid = $1)
+					sitepk = (SELECT DISTINCT ON (sitepk) sitepk FROM fits.site WHERE siteid = $1)
 					AND
-					typePK = (SELECT DISTINCT ON (typepk)  typepk FROM fits.type WHERE typeid = $3)
+					typePK = (SELECT DISTINCT ON (typepk)  typepk FROM fits.type WHERE typeid = $2)
 					`)
 	if err != nil {
 		return err
@@ -171,7 +167,7 @@ func (d *data) deleteThenSave() (err error) {
 	}
 	defer obsInsert.Close()
 
-	_, err = obsDelete.Exec(d.Properties.NetworkID, d.Properties.SiteID, d.Properties.TypeID)
+	_, err = obsDelete.Exec(d.Properties.SiteID, d.Properties.TypeID)
 	if err != nil {
 		tx.Rollback()
 		return err

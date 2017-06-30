@@ -22,7 +22,8 @@ type DataBase struct {
 	MaxOpenConns, MaxIdleConns    int
 }
 
-const vers = "0.2"
+// version 1.x no longer uses the network code in the DB.
+const vers = "1.0"
 
 var (
 	config                             = initConfig()
