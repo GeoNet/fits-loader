@@ -7,18 +7,12 @@ import (
 )
 
 var (
-	checkNetwork *sql.Stmt
 	checkType    *sql.Stmt
 	checkSample  *sql.Stmt
 )
 
 // initSource should be called after the db is available.
 func initSource() (err error) {
-	checkNetwork, err = db.Prepare("SELECT networkID from fits.network where networkID = $1")
-	if err != nil {
-		return err
-	}
-
 	checkType, err = db.Prepare(`SELECT typeID
 					 FROM fits.type 
 					 JOIN fits.type_method USING (typepk) 
@@ -50,7 +44,7 @@ type source struct {
 }
 
 type sourceProperties struct {
-	SiteID, Name, NetworkID, TypeID, MethodID, SampleID, SystemID string
+	SiteID, Name, TypeID, MethodID, SampleID, SystemID string
 	Height, GroundRelationship                                    float64
 }
 
@@ -90,14 +84,6 @@ func (s *source) unmarshall(b []byte) (err error) {
 func (s *source) valid() (err error) {
 	var d string
 
-	err = checkNetwork.QueryRow(s.Properties.NetworkID).Scan(&d)
-	if err == sql.ErrNoRows {
-		return fmt.Errorf("networkID not found in the DB for %s.%s", s.Properties.NetworkID, s.Properties.SiteID)
-	}
-	if err != nil {
-		return err
-	}
-
 	err = checkType.QueryRow(s.Properties.TypeID, s.Properties.MethodID).Scan(&d)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("typeID.methodID not found in the DB for %s.%s", s.Properties.TypeID, s.Properties.MethodID)
@@ -119,7 +105,6 @@ func (s *source) valid() (err error) {
 
 func (s *source) saveSite() (err error) {
 	_, err = addSite.Exec(
-		s.Properties.NetworkID,
 		s.Properties.SiteID,
 		s.Properties.Name,
 		s.longitude(),

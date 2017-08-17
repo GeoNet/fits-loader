@@ -2,8 +2,6 @@
 
 Loads source and observation data into the Field Information Time Series data base.
 
-[![Build Status](https://snap-ci.com/GeoNet/fits-loader/branch/master/build_image)](https://snap-ci.com/GeoNet/fits-loader/branch/master)
-
 ### Usage
 
 `fits-loader` reads a data directory looking for observation CSV files.  Each observation file must have a corresponding source JSON file that 
@@ -41,7 +39,6 @@ date time, e (mm), error (mm)
  		"height": -999.9,
  		"groundRelationship": -999.9,
  		"name": "Te Maari 2",
- 		"networkID": "CG",
  		"typeID": "e",
  		"methodID": "bernese5"
  	}
@@ -85,7 +82,7 @@ fits-loader --config-file /etc/sysconfig/fits-loader.json --data-dir /work/gnss
 ```
 
 * Observation and source data are loaded and validated.
-* Site information is added to the DB or updated where the networkID.siteID already exists.
+* Site information is added to the DB or updated where the siteID already exists.
 * Observations for the source are added to the DB or where there are already observations for the source at the date times in the observation
 file the value and error are updated.
 
@@ -99,7 +96,7 @@ fits-loader --config-file /etc/sysconfig/fits-loader.json --data-dir /work/gnss 
 ```
 
  Observation and source data are loaded and validated.
-* Site information is added to the DB or updated where the networkID.siteID already exists.
+* Site information is added to the DB or updated where the siteID already exists.
 * Observations in the DB for the source are exactly synchronised with the observations in the file.
 
 ###### Validation
@@ -116,11 +113,5 @@ switch to syslogging by adding
 
 ```
 --syslog
-```
-
-### Building
-
-```
-godep go build
 ```
 

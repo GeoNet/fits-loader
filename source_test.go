@@ -28,7 +28,6 @@ func TestSource(t *testing.T) {
 	o.Properties.Height = -999.9
 	o.Properties.GroundRelationship = -999.9
 	o.Properties.Name = "Te Maari 2"
-	o.Properties.NetworkID = "CG"
 	o.Properties.TypeID = "e"
 	o.Properties.MethodID = "bernese5"
 	o.Properties.SystemID = "none"
