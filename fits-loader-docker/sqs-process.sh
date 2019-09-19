@@ -21,7 +21,8 @@ if [[ "${RAW_MESSAGE}" != "" ]]; then
     fi
     mkdir data
 
-    unzip -o "${FILENAME}" -d data/
+    tar -xvzf "${FILENAME}" -C data/
+
     rm "${FILENAME}"
 
     echo "invoking fits-loader"
@@ -30,7 +31,7 @@ if [[ "${RAW_MESSAGE}" != "" ]]; then
     rm -rf data
     aws s3 rm "${S3PATH}"
   else
-    echo "event was not an S3 Bucket Notification"
+    echo "event was not an S3 ObjectCreated:Put, was: '${EVENTTYPE}'"
   fi
 
   echo "removing processed event"
