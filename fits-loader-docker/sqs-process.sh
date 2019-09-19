@@ -10,7 +10,7 @@ if [[ "${RAW_MESSAGE}" != "" ]]; then
   MESSAGERH=$(echo "${RAW_MESSAGE}" | jq --raw-output '.Messages[0].ReceiptHandle')
   EVENTTYPE=$(echo "${MESSAGEBODY}" | jq --raw-output '.Records[0].eventName')
 
-  if [[ "${EVENTTYPE}" == "ObjectCreated:Put" ]]; then
+  if [[ "${EVENTTYPE}" == ObjectCreated:* ]]; then
     S3PATH=$(echo "${MESSAGEBODY}" | jq --raw-output '"s3://" + .Records[0].s3.bucket.name + "/" + .Records[0].s3.object.key')
     FILENAME=$(echo "${MESSAGEBODY}" | jq --raw-output '.Records[0].s3.object.key')
 
