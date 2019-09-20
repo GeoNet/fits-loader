@@ -11,6 +11,6 @@ FILENAME=$(date +%s)
 
 tar -czvf ${FILENAME}.tar.gz -C "${1}" .
 
-aws s3 cp "${FILENAME}.tar.gz" s3://fits-spool/
+aws s3 cp "df.${FILENAME}.tar.gz" s3://fits-spool/
 
 rm "${FILENAME}.tar.gz"

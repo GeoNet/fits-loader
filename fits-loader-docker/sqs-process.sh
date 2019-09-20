@@ -26,7 +26,11 @@ if [[ "${RAW_MESSAGE}" != "" ]]; then
     rm "${FILENAME}"
 
     echo "invoking fits-loader"
-    ./fits-loader --data-dir data
+    if [[ "${FILENAME}" == df.*.tar.gz ]]; then
+      ./fits-loader --data-dir data --delete-first # gnss gamit solutions are large and require
+    else
+      ./fits-loader --data-dir data
+    fi
 
     rm -rf data
     aws s3 rm "${S3PATH}"
