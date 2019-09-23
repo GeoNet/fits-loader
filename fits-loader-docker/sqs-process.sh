@@ -27,6 +27,7 @@ if [[ "${RAW_MESSAGE}" != "" ]]; then
 
     echo "invoking fits-loader"
     if [[ "${FILENAME}" == df.*.tar.gz ]]; then
+      echo "using --delete-first"
       ./fits-loader --data-dir data --delete-first # gnss gamit solutions are large and require
     else
       ./fits-loader --data-dir data

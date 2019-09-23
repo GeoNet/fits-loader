@@ -26,11 +26,11 @@ type DataBase struct {
 const vers = "1.0"
 
 var (
-	config                             = initConfig()
-	db                                 *sql.DB
-	dataDir                            string
-	configFile                         string
-	dryRun, deleteFirst, slog, version bool
+	config                                        = initConfig()
+	db                                            *sql.DB
+	dataDir                                       string
+	configFile                                    string
+	dryRun, deleteFirst, slog, version, locValid bool
 )
 
 func initConfig() Config {
@@ -39,12 +39,17 @@ func initConfig() Config {
 	flag.BoolVar(&slog, "syslog", false, "output log messages to syslog instead of stdout.")
 	flag.BoolVar(&deleteFirst, "delete-first", false, "sync the FITS DB data with the information in each observation file.")
 	flag.BoolVar(&dryRun, "dry-run", false, "data is parsed and validated but not loaded to the DB.  A DB connection is needed for validation.")
+	flag.BoolVar(&locValid, "local-validate", false, "data is parsed and validated without a connection to the DB.")
 	flag.BoolVar(&version, "version", false, "prints the version and exits.")
 	flag.Parse()
 
 	if version {
 		fmt.Printf("fits-loader version %s\n", vers)
 		os.Exit(1)
+	}
+
+	if locValid {
+		fmt.Println("Validating without DB connection")
 	}
 
 	if slog {
@@ -58,17 +63,19 @@ func initConfig() Config {
 		}
 	}
 
-	f, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		log.Printf("ERROR - problem loading %s - can't find any config.", configFile)
-		log.Fatal(err)
-	}
-
 	var c Config
-	err = json.Unmarshal(f, &c)
-	if err != nil {
-		log.Println("Problem parsing config file.")
-		log.Fatal(err)
+	if !locValid {
+		f, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			log.Printf("ERROR - problem loading %s - can't find any config.", configFile)
+			log.Fatal(err)
+		}
+
+		err = json.Unmarshal(f, &c)
+		if err != nil {
+			log.Println("Problem parsing config file.")
+			log.Fatal(err)
+		}
 	}
 
 	return c
@@ -79,10 +86,12 @@ func main() {
 		log.Fatal("please specify the data directory")
 	}
 
-	if err := config.initDB(); err != nil {
-		log.Fatal(err)
+	if !locValid {
+		if err := config.initDB(); err != nil {
+			log.Fatal(err)
+		}
+		defer db.Close()
 	}
-	defer db.Close()
 
 	log.Printf("searching for observation and source data in %s", dataDir)
 	files, err := ioutil.ReadDir(dataDir)
@@ -115,7 +124,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		if !dryRun {
+		if !dryRun && !locValid {
 			log.Printf("saving site information from %s", d.sourceFile)
 			if err := d.saveSite(); err != nil {
 				log.Fatal(err)
