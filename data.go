@@ -56,8 +56,10 @@ func (d *data) parseAndValidate() (err error) {
 	}
 	f.Close()
 
-	if err = d.valid(); err != nil {
-		return err
+	if !locValid {
+		if err = d.valid(); err != nil {
+			return err
+		}
 	}
 
 	return err
