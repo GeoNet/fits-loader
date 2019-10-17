@@ -1,4 +1,4 @@
-FROM golang:1.12-alpine as build
+FROM golang:1.13.1-alpine as build
 WORKDIR /go/src/github.com/GeoNet/fits-loader
 COPY . ./
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags "-X main.Prefix=${i}/${VERSION} -extldflags -static" -o fits-loader .
