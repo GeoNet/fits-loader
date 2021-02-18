@@ -4,7 +4,7 @@ COPY . ./
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags "-X main.Prefix=${i}/${VERSION} -extldflags -static" -o fits-loader .
 
 FROM quay.io/geonet/python:alpine3.11
-RUN apk add --no-cache bash jq
+RUN apk add --no-cache bash jq ca-certificates tzdata
 RUN pip3 install awscli --upgrade
 WORKDIR /home
 COPY --from=build /go/src/github.com/GeoNet/fits-loader/fits-loader .
