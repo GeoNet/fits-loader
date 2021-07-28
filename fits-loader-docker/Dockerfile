@@ -1,4 +1,4 @@
-FROM quay.io/geonet/golang:1.13.1-alpine as build
+FROM quay.io/geonet/golang:1.15-alpine as build
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /go/src/github.com/GeoNet/fits-loader
 COPY . ./
