@@ -18,6 +18,9 @@ var (
 func initData() (err error) {
 	// siteID, typeID, methodID, sampleID, systemID, time, value, error
 	addObservation, err = db.Prepare("SELECT fits.add_observation($1, $2, $3, $4, $5, $6, $7, $8)")
+	if err != nil {
+		return err
+	}
 
 	// siteID, name, longitude, latitude, height, ground_relationship
 	addSite, err = db.Prepare("SELECT fits.add_site($1, $2, $3, $4, $5, $6)")
@@ -94,7 +97,7 @@ func (d *data) deleteThenSave() (err error) {
 	tx, err := db.Begin()
 
 	var sitePK int
-	err = tx.QueryRow(`SELECT DISTINCT ON (sitepk) sitepk 
+	err = tx.QueryRow(`SELECT DISTINCT ON (sitepk) sitepk
 				FROM fits.site WHERE siteid = $1`, d.Properties.SiteID).Scan(&sitePK)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("couldn't get sitePK for %s", d.Properties.SiteID)
@@ -128,12 +131,12 @@ func (d *data) deleteThenSave() (err error) {
 	// also checks that the type is valid for this method.
 	var typePK int
 	err = tx.QueryRow(`SELECT DISTINCT ON (typePK) typePK
-				FROM fits.type 
-				JOIN fits.type_method USING (typepk) 
-				JOIN fits.method USING (methodpk) 
-				WHERE 
-				typeid = $1 
-				AND 
+				FROM fits.type
+				JOIN fits.type_method USING (typepk)
+				JOIN fits.method USING (methodpk)
+				WHERE
+				typeid = $1
+				AND
 				 methodid = $2`, d.Properties.TypeID, d.Properties.MethodID).Scan(&typePK)
 	if err == sql.ErrNoRows {
 		return fmt.Errorf("couldn't get typePK for %s.%s", d.Properties.TypeID, d.Properties.MethodID)
@@ -171,13 +174,19 @@ func (d *data) deleteThenSave() (err error) {
 
 	_, err = obsDelete.Exec(d.Properties.SiteID, d.Properties.TypeID)
 	if err != nil {
-		tx.Rollback()
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			fmt.Printf("error in rollback of DB delete transaction: %v\n", rollbackErr)
+		}
 		return err
 	}
 
 	_, err = obsInsert.Exec()
 	if err != nil {
-		tx.Rollback()
+		rollbackErr := tx.Rollback()
+		if rollbackErr != nil {
+			fmt.Printf("error in rollback of DB insert transaction: %v\n", rollbackErr)
+		}
 		return err
 	}
 
