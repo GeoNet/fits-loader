@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -9,7 +9,7 @@ import (
 func TestSource(t *testing.T) {
 	s := source{}
 
-	b, err := ioutil.ReadFile("etc/VGT2_e.json")
+	b, err := os.ReadFile("etc/VGT2_e.json")
 	if err != nil {
 		t.Error(err)
 	}
@@ -51,7 +51,7 @@ func TestSourceValid(t *testing.T) {
 	defer teardown()
 
 	s := source{}
-	b, err := ioutil.ReadFile("etc/VGT2_e.json")
+	b, err := os.ReadFile("etc/VGT2_e.json")
 	if err != nil {
 		t.Error(err)
 	}

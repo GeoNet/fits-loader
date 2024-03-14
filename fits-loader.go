@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	_ "github.com/lib/pq"
-	"io/ioutil"
 	"log"
 	"log/syslog"
 	"os"
 	"strings"
+
+	_ "github.com/lib/pq"
 )
 
 type Config struct {
@@ -26,10 +26,10 @@ type DataBase struct {
 const vers = "1.0"
 
 var (
-	config                                        = initConfig()
-	db                                            *sql.DB
-	dataDir                                       string
-	configFile                                    string
+	config                                       = initConfig()
+	db                                           *sql.DB
+	dataDir                                      string
+	configFile                                   string
 	dryRun, deleteFirst, slog, version, locValid bool
 )
 
@@ -65,7 +65,7 @@ func initConfig() Config {
 
 	var c Config
 	if !locValid {
-		f, err := ioutil.ReadFile(configFile)
+		f, err := os.ReadFile(configFile)
 		if err != nil {
 			log.Printf("ERROR - problem loading %s - can't find any config.", configFile)
 			log.Fatal(err)
@@ -94,7 +94,7 @@ func main() {
 	}
 
 	log.Printf("searching for observation and source data in %s", dataDir)
-	files, err := ioutil.ReadDir(dataDir)
+	files, err := os.ReadDir(dataDir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -102,7 +102,11 @@ func main() {
 	var proc []data
 
 	for _, f := range files {
-		if !f.IsDir() && strings.HasSuffix(f.Name(), `.csv`) && f.Size() > 0 {
+		info, err := f.Info()
+		if err != nil {
+			log.Fatalf("error getting file info for %s: %s", f.Name(), err.Error())
+		}
+		if !f.IsDir() && strings.HasSuffix(f.Name(), `.csv`) && info.Size() > 0 {
 			meta := f.Name()
 			meta = strings.TrimSuffix(meta, `.csv`) + `.json`
 

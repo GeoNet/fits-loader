@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -39,7 +38,7 @@ type data struct {
 
 func (d *data) parseAndValidate() (err error) {
 
-	b, err := ioutil.ReadFile(d.sourceFile)
+	b, err := os.ReadFile(d.sourceFile)
 	if err != nil {
 		return err
 	}
@@ -95,6 +94,9 @@ func (d *data) updateOrAdd() (err error) {
 func (d *data) deleteThenSave() (err error) {
 
 	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
 
 	var sitePK int
 	err = tx.QueryRow(`SELECT DISTINCT ON (sitepk) sitepk
