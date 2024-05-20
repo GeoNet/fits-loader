@@ -1,10 +1,10 @@
-FROM quay.io/geonet/golang:1.16-alpine as build
+FROM ghcr.io/geonet/base-images/go:1.21 as build
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /go/src/github.com/GeoNet/fits-loader
 COPY . ./
 RUN CGO_ENABLED=0 GOOS=linux go build -a -ldflags "-X main.Prefix=${i}/${VERSION} -extldflags -static" -o fits-loader .
 
-FROM quay.io/geonet/python:alpine3.11
+FROM ghcr.io/geonet/base-images/python:3.11.4-alpine3.18
 RUN apk add --no-cache bash jq
 RUN pip3 install awscli --upgrade
 WORKDIR /home
