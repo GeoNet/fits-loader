@@ -1,4 +1,4 @@
-FROM ghcr.io/geonet/base-images/go:1.21 as build
+FROM ghcr.io/geonet/base-images/golang:1.23-alpine3.21 as build
 RUN apk add --no-cache ca-certificates tzdata
 WORKDIR /go/src/github.com/GeoNet/fits-loader
 COPY . ./
